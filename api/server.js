@@ -43,10 +43,12 @@ db.on("error", function(error) {
 
 // songs Routes
 // ======
+  //documentation for mongojs:
+    //https://github.com/mafintosh/mongojs
 
   app.get("/songs", function(req, res) {
     // Find all songs in the songs collection
-    db.songs.find({}, function(error, found) {
+    db.songs.find({}, function(error, songs) {
       // Log any errors
       if (error) {
         console.log(error);
@@ -54,7 +56,10 @@ db.on("error", function(error) {
       // Otherwise, send json of the songs back to user
       // This will fire off the success function of the ajax request
       else {
-        res.json(found);
+        //pretend that it takes 5 seconds to get the songs back
+        //setTimeout(function(){
+          res.json(songs);
+        //}, 5000)
       }
     });
   });
@@ -65,12 +70,13 @@ db.on("error", function(error) {
     console.log(req.body);
 
     // Insert the song into the songs collection
-    db.songs.insert(req.body, function(error, saved) {
+    db.songs.insert(req.body, function(error, savedSong) {
       // Log any errors
       if (error) {
         console.log(error);
       }else {
-        res.send(saved);
+        //the reason why we are sending the savedSong back is because we now have an _id to give to the client
+        res.json(savedSong);
       }
     });
   });
@@ -79,31 +85,46 @@ db.on("error", function(error) {
   app.get("/songs/:id", function(req, res) {
     db.songs.findOne({
       "_id": mongojs.ObjectId(req.params.id)
-    }, function(error, found) {
+    }, function(error, oneSong) {
       if (error) {
         res.send(error);
       }else {
-        res.send(found);
+        res.json(oneSong);
       }
     });
   });
 
   //update a song
   app.put("/songs/:id", function(req, res) {
-    db.songs.update({
-      "_id": mongojs.ObjectId(req.params.id)
-    }, {
-      $set: {
-        "artist": req.body.artist,
-        "songName": req.body.song
-      }
-    }, function(error, edited) {
-      if (error) {
-        res.send(error);
-      }else {
-        res.send(edited);
-      }
-    });
+    //if we use this then we won't get the updated document back
+    /* 
+      db.songs.update({
+        "_id": mongojs.ObjectId(req.params.id)
+      }, {
+        $set: {
+          "artist": req.body.artist,
+          "songName": req.body.songName
+        }
+      }, function(error, editedSong) {
+        if (error) {
+          res.send(error);
+        }else {
+          res.json(editedSong);
+        }
+      });
+    */
+
+    db.songs.findAndModify({
+      query: { 
+        "_id": mongojs.ObjectId(req.params.id) 
+      },
+      update: { $set: {
+        "artist": req.body.artist, "songName": req.body.songName } 
+      },
+      new: true
+      }, function (err, editedSong) {
+          res.json(editedSong);
+      });
   });
 
   app.delete("/songs/:id", function(req, res) {

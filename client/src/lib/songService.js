@@ -1,16 +1,16 @@
 const baseUrl = 'http://localhost:3001/songs'
 
-export const loadSongs = () => {
+export const __loadSongs = () => {
   return fetch(baseUrl)
     .then(res => res.json())
 }
 
-export const loadSong = (song) => {
+export const __loadSong = (song) => {
   return fetch(`${baseUrl}/${song._id}`)
     .then(res => res.json())
 }
 
-export const createSong = (song) => {
+export const __createSong = (song) => {
   return fetch(baseUrl, {
     method: 'POST',
     headers: {
@@ -21,8 +21,8 @@ export const createSong = (song) => {
   }).then(res => res.json())
 }
 
-export const updateSong = (song) => {
-  return fetch(`${baseUrl}/${song._id}`, {
+export const __updateSong = (song, _id) => {
+  return fetch(`${baseUrl}/${_id}`, {
     method: 'PUT',
     headers: {
       'Accept': 'application/json',
@@ -32,7 +32,7 @@ export const updateSong = (song) => {
   }).then(res => res.json())
 }
 
-export const destroySong = (id) => {
+export const __destroySong = (id) => {
   return fetch(`${baseUrl}/${id}`, {
     method: 'DELETE',
     headers: {
